@@ -1,0 +1,182 @@
+ALL 
+
+import getpass
+import sys
+import telnetlib
+
+HOST = ("192.168.146.136","192.168.146.139","192.168.146.137")
+user = raw_input("Enter your username: ")
+password = getpass.getpass()
+
+for i in HOST:
+    if i is "192.168.146.136":
+        tn = telnetlib.Telnet(HOST[0], timeout = 15)
+        tn.read_until("Username:")
+        tn.write(user + "\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password + "\n")
+        tn.write("conf t\n")
+        tn.write("int lo0\n")
+        tn.write("ip add 1.1.1.1 255.255.255.255\n")
+        tn.write("end\n")
+        tn.write("exit\n")
+        print tn.read_all()
+
+    elif i is "192.168.146.139":
+        tn = telnetlib.Telnet(HOST[1], timeout =15)
+        tn.read_until("Username:")
+        tn.write(user + "\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password + "\n")
+        tn.write("en\n")
+        tn.write("conf t\n")
+        tn.write("int lo 0\n")
+        tn.write("ip add 1.1.1.1 255.255.255.255\n")
+        tn.write("end\n")
+        tn.write("exit\n")
+        print tn.read_all()
+
+    elif i is "192.168.146.137":
+        tn = telnetlib.Telnet(HOST[2], timeout = 15)
+        tn.read_until("login:")
+        tn.write(user + "\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password + "\n")
+        tn.write("configure\n")
+        tn.write("set interfaces lo0 unit 0 family inet address 1.1.1.1/32\n")
+        tn.write("commit and-quit\n")
+        tn.write("exit\n")
+        print tn.read_all()
+-----------
+IOS
+
+import getpass
+import sys
+import telnetlib
+
+HOST = "192.168.146.136"
+user = raw_input("Enter your username: ")
+password = getpass.getpass()
+
+tn = telnetlib.Telnet(HOST, timeout = 5)
+
+tn.read_until("Username: ")
+tn.write(user + "\n")
+
+if password:
+    tn.read_until("Password:")
+    tn.write(password + "\n")
+
+tn.write("conf t\n")
+tn.write("int lo0\n")
+tn.write("ip add 1.1.1.1 255.255.255.255\n")
+tn.write("end\n")
+tn.write("exit\n")
+
+print tn.read_all()
+----------
+EOS
+
+import getpass
+import sys
+import telnetlib
+
+HOST = "192.168.146.139"
+user = raw_input("Enter your username: ")
+password = getpass.getpass()
+
+tn = telnetlib.Telnet(HOST, timeout = 5)
+
+tn.read_until("Username: ")
+tn.write(user + "\n")
+
+if password:
+    tn.read_until("Password:")
+    tn.write(password + "\n")
+
+tn.write("en\n")
+tn.write("conf t\n")
+tn.write("in lo 0\n")
+tn.write("ip add 1.1.1.1 255.255.255.255\n")
+tn.write("end\n")
+tn.write("exit\n")
+
+print tn.read_all()
+----------
+
+JUNOS
+
+import getpass
+import sys
+import telnetlib
+
+HOST = "192.168.146.137"
+user = raw_input("Enter your username: ")
+password = getpass.getpass()
+
+tn = telnetlib.Telnet(HOST, timeout = 5)
+
+tn.read_until("login: ")
+tn.write(user + "\n")
+
+if password:
+    tn.read_until("Password:")
+    tn.write(password + "\n")
+
+tn.write("configure\n")
+tn.write("set interfaces lo0 unit 0 family inet address 1.1.1.1/32\n")
+tn.write("commit and-quit\n")
+tn.write("exit\n")
+
+print tn.read_all()
+-----------------
+BACKUP
+import getpass
+import telnetlib
+
+user = raw_input("Enter your username: ")
+password = getpass.getpass()
+
+HOST = ("192.168.146.137","192.168.146.136","192.168.146.139")
+
+for i in HOST:
+    print("\n\nconnecting to " +i)
+    tn = telnetlib.Telnet(i, timeout =15)
+    if i is "192.168.146.137":
+        tn.read_until("login:")
+        tn.write(user+"\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password+"\n")
+        tn.write("sh configuraton | display set\n")
+        tn.write("exit\n")
+
+    elif i is "192.168.146.136":
+        tn.read_until("Username:")
+        tn.write(user+"\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password+"\n")
+        tn.write("terminal length 0\n")
+        tn.write("show runni\n")
+        tn.write("exit\n")
+
+    elif i is "192.168.146.139":
+        tn.read_until("Username:")
+        tn.write(user+"\n")
+        if password:
+            tn.read_until("Password:")
+            tn.write(password+"\n")
+        tn.write("en\n")
+        tn.write("terminal length 0\n")
+        tn.write("show runn\n\n")
+        tn.write("exit\n")
+    readall = tn.read_all()
+    File = open("File"+str(i),"w")
+    File.write(readall)
+    File.write("\n")
+    File.close()
+    print("Backup of "+i+" completed")
